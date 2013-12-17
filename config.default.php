@@ -53,5 +53,7 @@
 @define ('SIZE_TITLE',		100);		//post title
 @define ('SIZE_TEXT',		50000);		//post message
 
+//karma options
+@define ('KARMA_DEFAULT',   0);         //default karma rating for new user
 
 ?>

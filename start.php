@@ -187,13 +187,16 @@ if ((	//if HTTP authentication is used, we don’t need to validate the form fie
 	//users are stored as text files based on the hash of the given name
 	$name = hash ('sha512', strtolower (NAME));
 	$user = FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$name.txt";
-	
+    //create a users karma file
+    $karma = FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$name.karma";
+
 	//create the user, if new:
 	//- if registrations are allowed (`FORUM_NEWBIES` is true)
 	//- you can’t create new users with the HTTP_AUTH sign in
 	if (FORUM_NEWBIES && !isset ($_SERVER['PHP_AUTH_USER']) && !file_exists ($user))
 		file_put_contents ($user, hash ('sha512', $name.PASS)) or require FORUM_LIB.'error_permissions.php'
-	;
+        file_put_contents ($karma, KARMA_DEFAULT) or require FORUM_LIB.'error_permissions.php'   
+    ;
 	
 	//does password match?
 	define ('AUTH', @file_get_contents ($user) == hash ('sha512', $name.PASS));
