@@ -511,7 +511,11 @@ $template->set (array (
 	'#nnf_post-author'		=> $post->author,
 	'a#nnf_post-append@href'	=> url (PATH_URL, $FILE, $PAGE, 'append',
 					        substr (strstr ($post->link, '#'), 1)).'#append',
-	'a#nnf_post-delete@href'	=> url (PATH_URL, $FILE, $PAGE, 'delete')
+	'a#nnf_post-delete@href'	=> url (PATH_URL, $FILE, $PAGE, 'delete'),
+    'a#nnf_post-plus@href'	    => url (PATH_URL, $FILE, $PAGE, 'plus',
+                            substr (strstr ($post->link, '#'), 1)),
+    'a#nnf_post-minus@href'	    => url (PATH_URL, $FILE, $PAGE, 'minus',
+                            substr (strstr ($post->link, '#'), 1))
 ))->remove (array (
 	//if the user who made the post is a mod, also mark the whole post as by a mod
 	//(you might want to style any posts made by a mod differently)
@@ -563,7 +567,11 @@ if (!count ($thread)) {
 			'a.nnf_reply-append@href'	=> url (PATH_URL, $FILE, $PAGE, 'append',
 								substr (strstr ($reply->link, '#'), 1)).'#append',
 			'a.nnf_reply-delete@href'	=> url (PATH_URL, $FILE, $PAGE, 'delete',
-								substr (strstr ($reply->link, '#'), 1))
+								substr (strstr ($reply->link, '#'), 1)),
+            'a.nnf_reply-plus@href'     => url (PATH_URL, $FILE, $PAGE, 'plus',
+                                substr (strstr ($reply->link, '#'), 1)),
+            'a.nnf_reply-minus@href'     => url (PATH_URL, $FILE, $PAGE, 'minus',
+                                substr (strstr ($reply->link, '#'), 1))
 		))->remove (array (
 			//has the reply been deleted (blanked)?
 			'./@class'			=> $reply->xpath ('category[.="deleted"]') ? false : 'nnf_deleted',
