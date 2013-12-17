@@ -20,6 +20,14 @@ How NoNonsense differs from other forums:
         No user profiles. No "status updates". No signatures.
         No user ranks. Just pure discussion with none of the cruft.
 
+:: Community moderated
+        Once users have earned 'reputation', by having posts (+)'d
+        by other users, they are able to (-) other users posts.
+        When a post reaches the delete threshold, the post is
+        automatically deleted.
+        When a user has their post (-)'d, their reputation is
+        reduced.
+        (experimental)  
 
 Contents:
 ========================================================================
