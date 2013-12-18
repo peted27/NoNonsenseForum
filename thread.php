@@ -372,13 +372,7 @@ if (isset ($_GET['delete'])) {
 if (isset($_GET['plus']) || isset($_GET['minus'])) {
 
     //get id of post, must be a better way
-    if (isset($_GET['plus'])) {
-        $ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['plus']) ? $_GET['plus'] : false);
-    } elseif (isset($_GET['minus'])) {
-        $ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['minus']) ? $_GET['minus'] : false);
-    } else {
-        $ID = false;
-    }
+    $ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['plus']) ? $_GET['plus'] : (@$_GET['minus'] ? $_GET['minus'] : false));
 
     //get a write lock on the file so that between now and saving, no other posts could slip in
     $f = fopen ("$FILE.rss", 'r+'); flock ($f, LOCK_EX);
