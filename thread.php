@@ -367,7 +367,7 @@ if (isset ($_GET['delete'])) {
 }
 
 /* ======================================================================================================================
-   plus link clicked
+   plus/minus link clicked
    ====================================================================================================================== */
 if (isset($_GET['plus']) || isset($_GET['minus'])) {
 
@@ -387,7 +387,16 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
         !(strtolower (NAME) == strtolower ($post->author)) && //cant vote on own post
         !(in_array(strtolower (NAME), explode(',', $post->voted))) //hasnt already voted
     ) {
-        //TODO apply vote
+        //apply the new score
+        $score = @$_GET['plus']) ? SCORE_PLUS : (@$_GET['minus'] ? SCORE_MINUS : 0)); 
+        $post->score += $score;
+        $post->voted += ','.strtolower (NAME);
+        //commit the data
+        rewind ($f); ftruncate ($f, 0); fwrite ($f, $xml->asXML ());
+        //close the lock / file
+        flock ($f, LOCK_UN); fclose ($f);
+
+
         //TODO apply karma to author
     } else {
         //TODO display error

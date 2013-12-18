@@ -55,5 +55,8 @@
 
 //karma options
 @define ('KARMA_DEFAULT',   0);         //default karma rating for new user
-
+@define ('KARM_PLUS',       0.1);       //karma earnt when post/reply (+)'d
+@define ('KARMA_MINUS',     -0.1);      //karma earnt when post/reply (-)'d
+@define ('SCORE_PLUS',      1);         //add to score when (+)'d
+@define ('SCORE_MINUS',     -1);        //add to score when (-)'d
 ?>
