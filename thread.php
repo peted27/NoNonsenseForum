@@ -388,7 +388,7 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
         !(in_array(strtolower (NAME), explode(',', $post->voted))) //hasnt already voted
     ) {
         //apply the new score
-        $score = @$_GET['plus']) ? SCORE_PLUS : (@$_GET['minus'] ? SCORE_MINUS : 0)); 
+        $score = @$_GET['plus'] ? SCORE_PLUS : (@$_GET['minus'] ? SCORE_MINUS : 0); 
         $post->score += $score;
         $post->voted += ','.strtolower (NAME);
         //commit the data
