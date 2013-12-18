@@ -390,7 +390,7 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
         //apply the new score
         $score = @$_GET['plus'] ? SCORE_PLUS : (@$_GET['minus'] ? SCORE_MINUS : 0); 
         $post->score += $score;
-        $post->voted += ','.strtolower (NAME);
+        $post->voted .= ','.strtolower (NAME);
         //commit the data
         rewind ($f); ftruncate ($f, 0); fwrite ($f, $xml->asXML ());
         //close the lock / file
