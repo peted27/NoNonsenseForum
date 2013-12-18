@@ -522,7 +522,9 @@ $template->set (array (
 	'.nnf_post@class, #nnf_post-author@class' => !isMod ($post->author) ? 'nnf_mod' : false,
 	
 	//append / delete links?
-	'#nnf_post-append, #nnf_post-delete' => !CAN_REPLY
+    '#nnf_post-append, #nnf_post-delete' => !CAN_REPLY,
+    //plus / minus link not available when not logged in with http_auth
+    '#nnf_post-plus', '#nnf_post-minus'   => !CAN_VOTE
 ));
 
 try {	//insert the post-text, dealing with an invalid HTML error
@@ -599,7 +601,11 @@ if (!count ($thread)) {
 			//append link not available when the reply has been deleted
 			'.nnf_reply-append' => $reply->xpath ('category[.="deleted"]'),
 			//delete link not available when the reply has been deleted, except to mods
-			'.nnf_reply-delete' => $reply->xpath ('category[.="deleted"]') && !IS_MOD
+            '.nnf_reply-delete' => $reply->xpath ('category[.="deleted"]') && !IS_MOD,
+            //plus link not available when not logged in with http_auth
+            '.nnf_reply-plus'   => !CAN_VOTE,
+            //minus link not available when not logged in with http_auth
+            '.nnf_reply-minus'  => !CAN_VOTE
 		));
 		
 		try {	//insert the post-text, dealing with an invalid HTML error
