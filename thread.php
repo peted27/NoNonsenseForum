@@ -558,7 +558,7 @@ $template->set (array (
 	//append / delete links?
     '#nnf_post-append, #nnf_post-delete' => !CAN_REPLY,
     //plus / minus link not available when not logged in with http_auth
-    '#nnf_post-plus', '#nnf_post-minus'   => !CAN_VOTE
+    '#nnf_post-plus, #nnf_post-minus'   => !CAN_VOTE
 ));
 
 try {	//insert the post-text, dealing with an invalid HTML error

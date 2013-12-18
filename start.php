@@ -242,7 +242,14 @@ define ('IS_ADMIN',  AUTH && isAdmin (NAME));
 define ('IS_MOD',    AUTH && isMod (NAME));
 //is the current user a member of this forum?
 define ('IS_MEMBER', AUTH && isMember (NAME));
-
+//can the curren user vote on posts/replies?
+// TODO need to load current users karma from file, aswell as test auth
+// it might be worth not testing for karma untill a user actually votes
+// so as not to load karma file on every page request
+define ('CAN_VOTE', FORUM_ENABLED && (
+    AUTH_HTTP &&
+    !FORUM_LOCK
+));
 
 /* theme & translation
    ====================================================================================================================== */
