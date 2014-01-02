@@ -49,9 +49,9 @@ if (	(isset ($_POST['stick']) || isset ($_POST['unstick'])) &&
 	} else {
 		$stickies[] = "$FILE.rss";
 	};
-	
+
 	file_put_contents ('sticky.txt', implode ("\r\n", $stickies), LOCK_EX);
-	
+
 	//TODO: redirect to eat the form submission
 }
 
@@ -65,7 +65,7 @@ if ((isset ($_POST['lock']) || isset ($_POST['unlock'])) && IS_MOD) {
 	//we have to read the XML using the file handle that's locked because in Windows, functions like
 	//`get_file_contents`, or even `simplexml_load_file`, won't work due to the lock
 	$xml = simplexml_load_string (fread ($f, filesize ("$FILE.rss"))) or require FORUM_LIB.'error_xml.php';
-	
+
 	//if there’s a "locked" category, remove it
 	if ((bool) $xml->channel->xpath ('category[.="locked"]')) {
 		//note: for simplicity this removes *all* channel categories as NNF only uses one at the moment,
@@ -80,20 +80,20 @@ if ((isset ($_POST['lock']) || isset ($_POST['unlock'])) && IS_MOD) {
 		//(TODO: could return to the particular page in the index the thread is on--complex!)
 		$url = FORUM_URL.url (PATH_URL);
 	}
-	
+
 	//commit the data
 	rewind ($f); ftruncate ($f, 0); fwrite ($f, $xml->asXML ());
 	//close the lock / file
 	flock ($f, LOCK_UN); fclose ($f);
-	
+
 	//try set the modified date of the file back to the time of the last reply
 	//(un/locking a thread does not push the thread back to the top of the index)
 	//note: this may fail if the file is not owned by the Apache process
 	@touch ("$FILE.rss", strtotime ($xml->channel->item[0]->pubDate));
-	
+
 	//regenerate the folder's RSS file
 	indexRSS ();
-	
+
 	header ("Location: $url", true, 303);
 	exit;
 }
@@ -106,11 +106,11 @@ if ($ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['append']) ? $_GET['append'] : f
 	//get a write lock on the file so that between now and saving, no other posts could slip in
 	$f   = fopen ("$FILE.rss", 'r+'); flock ($f, LOCK_EX);
 	$xml = simplexml_load_string (fread ($f, filesize ("$FILE.rss"))) or require FORUM_LIB.'error_xml.php';
-	
+
 	//find the post using the ID (we need to know the numerical index for later)
 	for ($i=0; $i<count ($xml->channel->item); $i++) if (strstr ($xml->channel->item[$i]->link, '#') == "#$ID") break;
 	$post = $xml->channel->item[$i];
-	
+
 	/* has the un/pw been submitted to authenticate the append?
 	   -------------------------------------------------------------------------------------------------------------- */
 	if (AUTH && TEXT && CAN_REPLY && (
@@ -125,7 +125,7 @@ if ($ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['append']) ? $_GET['append'] : f
 		//check for duplicate append:
 		if (	//normalise the original post and the append, and check the end of the original for a match
 			substr (unformatText ($post->description), -strlen ($_ = unformatText (formatText (TEXT)))) !== $_
-		) {	
+		) {
 			//append the given text to the reply
 			$post->description = formatText (
 				//NNF's markup is unique in that it is fully reversable just by stripping the HTML tags!
@@ -141,29 +141,29 @@ if ($ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['append']) ? $_GET['append'] : f
 				//provide access to the whole discussion thread to be able to link "@user" names
 				$xml
 			);
-			
+
 			//commit the data
 			rewind ($f); ftruncate ($f, 0); fwrite ($f, $xml->asXML ());
 			//close the lock / file
 			flock ($f, LOCK_UN); fclose ($f);
-			
+
 			//try set the modified date of the file back to the time of the last reply
 			//(appending to a post does not push the thread back to the top of the index)
 			//note: this may fail if the file is not owned by the Apache process
 			@touch ("$FILE.rss", strtotime ($xml->channel->item[0]->pubDate));
-			
+
 			//regenerate the folder's RSS file
 			indexRSS ();
 		}
-		
+
 		//return to the appended post
 		header ('Location: '.FORUM_URL.url (PATH_URL, $FILE, $PAGE)."#$ID", true, 303);
 		exit;
 	}
-	
+
 	//close the lock / file
 	flock ($f, LOCK_UN); fclose ($f);
-	
+
 	/* template the append page
 	   -------------------------------------------------------------------------------------------------------------- */
 	$template = prepareTemplate (
@@ -182,7 +182,7 @@ if ($ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['append']) ? $_GET['append'] : f
 		//if the user who made the post is a mod, also mark the whole post as by a mod
 		//(you might want to style any posts made by a mod differently)
 		'.nnf_post@class, #nnf_post-author@class' => !isMod ($post->author) ? 'nnf_mod' : false
-	
+
 	//the append form:
 	))->set (array (
 		//set the field values from what was typed in before
@@ -190,14 +190,14 @@ if ($ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['append']) ? $_GET['append'] : f
 		'input#nnf_name-field@value'		=> NAME, 'input#nnf_name-field@maxlength'	=> SIZE_NAME,
 		'input#nnf_pass-field@value'		=> PASS, 'input#nnf_pass-field@maxlength'	=> SIZE_PASS,
 		'textarea#nnf_text-field'		=> TEXT, 'textarea#nnf_text-field@maxlength'	=> SIZE_TEXT
-		
+
 	//is the user already signed-in?
 	))->remove (AUTH_HTTP
 		//don’t need the usual name / password fields and the deafult message for anonymous users
 		? '#nnf_name, #nnf_pass, #nnf_email, #nnf_error-none-append'
 		//user is not signed in, remove the "you are signed in as:" field and the message for signed in users
 		: '#nnf_name-http, #nnf_error-none-http'
-		
+
 	//handle error messages
 	)->remove (array (
 		//if there's an error of any sort, remove the default messages
@@ -211,7 +211,7 @@ if ($ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['append']) ? $_GET['append'] : f
 		//if the message text is valid, remove the error message
 		'#nnf_error-text'        => !FORM_SUBMIT || TEXT
 	));
-	
+
 	//call the theme-specific templating function, in 'theme.php', before outputting
 	theme_custom ($template);
 	exit ($template);
@@ -226,10 +226,10 @@ if (isset ($_GET['delete'])) {
 	$ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['delete']) ? $_GET['delete'] : false);
 	//get a write lock on the file so that between now and saving, no other posts could slip in
 	$f = fopen ("$FILE.rss", 'r+'); flock ($f, LOCK_EX);
-	
+
 	//load the thread to get the post preview
 	$xml = simplexml_load_string (fread ($f, filesize ("$FILE.rss"))) or require FORUM_LIB.'error_xml.php';
-	
+
 	//access the particular post. if no ID is provided (deleting the whole thread) use the last item in the RSS file
 	//(the first post), otherwise find the ID of the specific post
 	if (!$ID) {
@@ -241,7 +241,7 @@ if (isset ($_GET['delete'])) {
 		) break;
 		$post = $xml->channel->item[$i];
 	}
-	
+
 	/* has the un/pw been submitted to authenticate the delete?
 	   -------------------------------------------------------------------------------------------------------------- */
 	if (AUTH && CAN_REPLY && (
@@ -262,11 +262,11 @@ if (isset ($_GET['delete'])) {
 			@simplexml_load_string (
 				//most HTML entities are not allowed in XML, we need to convert these to test XML validity
 				'<body>'.DOMTemplate::html_entity_decode ($post->description).'</body>'
-			) === false	 
+			) === false
 		) {
 			//remove the post from the thread entirely
 			unset ($xml->channel->item[$i]);
-			
+
 			//we’ll redirect to the last page (which may have changed number when the post was deleted)
 			$url = FORUM_URL.url (PATH_URL, $FILE).'#nnf_replies';
 		} else {
@@ -274,45 +274,45 @@ if (isset ($_GET['delete'])) {
 			$post->description = (NAME == (string) $post->author) ? THEME_DEL_USER : THEME_DEL_MOD;
 			//add a "deleted" category so we know to no longer allow it to be edited or deleted again
 			if (!$post->xpath ('category[.="deleted"]')) $post->category[] = 'deleted';
-			
+
 			//need to know what page this post is on to redirect back to it
 			$url = FORUM_URL.url (PATH_URL, $FILE, $PAGE)."#$ID";
 		}
-		
+
 		//commit the data
 		rewind ($f); ftruncate ($f, 0); fwrite ($f, $xml->asXML ());
 		//close the lock / file
 		flock ($f, LOCK_UN); fclose ($f);
-		
+
 		//try set the modified date of the file back to the time of the last reply
 		//(so that deleting does not push the thread back to the top of the index)
 		//note: this may fail if the file is not owned by the Apache process
 		@touch ("$FILE.rss", strtotime ($xml->channel->item[0]->pubDate));
-		
+
 		//regenerate the folder's RSS file
 		indexRSS ();
-		
+
 		//return to the deleted post / last page
 		header ("Location: $url", true, 303);
 		exit;
 	} else {
 		//close the lock / file
 		flock ($f, LOCK_UN); fclose ($f);
-		
+
 		//delete the thread for reals
 		@unlink (FORUM_ROOT.PATH_DIR."$FILE.rss");
-		
+
 		//regenerate the folder's RSS file
 		indexRSS ();
-		
+
 		//return to the index
 		header ('Location: '.FORUM_URL.url (PATH_URL), true, 303);
 		exit;
 	}
-	
+
 	//close the lock / file
 	flock ($f, LOCK_UN); fclose ($f);
-	
+
 	/* template the delete page
 	   -------------------------------------------------------------------------------------------------------------- */
 	$template = prepareTemplate (
@@ -329,18 +329,18 @@ if (isset ($_GET['delete'])) {
 		//if the user who made the post is a mod, also mark the whole post as by a mod
 		//(you might want to style any posts made by a mod differently)
 		'.nnf_post@class, #nnf_post-author@class' => !isMod ($post->author) ? 'nnf_mod' : false
-	
+
 	//the authentication form:
 	))->set (array (
 		//set the field values from input	 //set the maximum field sizes
 		'input#nnf_name-field@value'	=> NAME, 'input#nnf_name-field@maxlength'	=> SIZE_NAME,
 		'input#nnf_pass-field@value'	=> PASS, 'input#nnf_pass-field@maxlength'	=> SIZE_PASS
-		
+
 	//are we deleting the whole thread, or just one reply?
 	))->remove ($ID
 		? '#nnf_error-none-thread'
 		: '#nnf_error-none-reply, #nnf_remove'	//if deleting the whole thread, also remove the checkbox option
-		
+
 	//handle error messages
 	)->remove (array (
 		//if there's an error of any sort, remove the default messages
@@ -352,7 +352,7 @@ if (isset ($_GET['delete'])) {
 		//if the name is valid, remove the error message
 		'#nnf_error-name-delete' => !FORM_SUBMIT || NAME
 	));
-	
+
 	try {	//insert the post-text, dealing with an invalid HTML error
 		$template->setValue ('#nnf_post-text', $post->description, true);
 		$template->remove (array ('.nnf_post@class' => 'nnf_error'));
@@ -360,7 +360,7 @@ if (isset ($_GET['delete'])) {
 		//if the HTML was invalid, replace with the corruption message
 		$template->setValue ('#nnf_post-text', THEME_HTML_ERROR, true);
 	}
-	
+
 	//call the theme-specific templating function, in 'theme.php', before outputting
 	theme_custom ($template);
 	exit ($template);
@@ -374,21 +374,24 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
     //get id of post, must be a better way
     $ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['plus']) ? $_GET['plus'] : (@$_GET['minus'] ? $_GET['minus'] : false));
 
-    //get a write lock on the file so that between now and saving, no other posts could slip in
-    $f = fopen ("$FILE.rss", 'r+'); flock ($f, LOCK_EX);
-    $xml = simplexml_load_string (fread ($f, filesize ("$FILE.rss"))) or require FORUM_LIB.'error_xml.php';
+    $user_karma = file_get_contents(FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$name.karma");
 
     //find the post using the ID (we need to know the numerical index for later)
     for ($i=0; $i<count ($xml->channel->item); $i++) if (strstr ($xml->channel->item[$i]->link, '#') == "#$ID") break;
     $post = $xml->channel->item[$i];
 
-    //work out if user can vote on this post 
-    if (AUTH_HTTP && CAN_VOTE && 
+    //work out if user can vote on this post
+    if (AUTH_HTTP && CAN_VOTE &&
         !(strtolower (NAME) == strtolower ($post->author)) && //cant vote on own post
-        !(in_array(strtolower (NAME), explode(',', $post->voted))) //hasnt already voted
+        !(in_array(strtolower (NAME), explode(',', $post->voted))) && //hasnt already voted
+        (($user_karma / 1) > 2) //user has enough karma to vote
     ) {
+        //get a write lock on the file so that between now and saving, no other posts could slip in
+        $f = fopen ("$FILE.rss", 'r+'); flock ($f, LOCK_EX);
+        $xml = simplexml_load_string (fread ($f, filesize ("$FILE.rss"))) or require FORUM_LIB.'error_xml.php';
+
         //apply the new score
-        $score = @$_GET['plus'] ? SCORE_PLUS : (@$_GET['minus'] ? SCORE_MINUS : 0); 
+        $score = @$_GET['plus'] ? SCORE_PLUS : (@$_GET['minus'] ? SCORE_MINUS : 0);
         $post->score += $score;
         $post->voted .= ','.strtolower (NAME);
         //commit the data
@@ -396,8 +399,18 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
         //close the lock / file
         flock ($f, LOCK_UN); fclose ($f);
 
+        //open and lock authors karma file
+        $f = fopen (FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$post->author.karma", 'r+'); flock ($f, LOCK_EX);
+        //read authors karma
+        $author_karma = file_get_contents(FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$post->author.karma");
+        //calculate new karma
+        $author_karma += @$_GET['plus'] ? KARM_PLUS : (@$_GET['minus'] ? KARMA_MINUS : 0);
+        //commit the data
+        rewind ($f); ftruncate ($f, 0); fwrite ($f, $author_karma);
+        //close the lock / file
+        flock ($f, LOCK_UN); fclose ($f);
 
-        //TODO apply karma to author
+
     } else {
         //TODO display error
     }
@@ -415,7 +428,7 @@ if (CAN_REPLY && AUTH && TEXT) {
 	//we have to read the XML using the file handle that's locked because in Windows, functions like
 	//`get_file_contents`, or even `simplexml_load_file`, won't work due to the lock
 	$xml = simplexml_load_string (fread ($f, filesize ("$FILE.rss"))) or require FORUM_LIB.'error_xml.php';
-	
+
 	//ignore a double-post (could be an accident with the back button)
 	if (	//same author?
 		NAME == $xml->channel->item[0]->author &&
@@ -432,7 +445,7 @@ if (CAN_REPLY && AUTH && TEXT) {
 			: ceil  ((count ($thread)+1) / FORUM_POSTS)
 		;
 		$url = FORUM_URL.url (PATH_URL, $FILE, $page).'#'.$post_id;
-		
+
 		//re-template the whole thread:
 		$rss = new DOMTemplate (file_get_contents (FORUM_LIB.'rss-template.xml'));
 		$rss->set (array (
@@ -442,7 +455,7 @@ if (CAN_REPLY && AUTH && TEXT) {
 			//is the thread unlocked?
 			'/rss/channel/category'		=> !$xml->channel->xpath ('category[.="locked"]')
 		));
-		
+
 		//template the new reply first
 		$items = $rss->repeat ('/rss/channel/item');
 		$items->set (array (
@@ -464,7 +477,7 @@ if (CAN_REPLY && AUTH && TEXT) {
 			//the new reply isn’t deleted, so remove the category marker
 			'./category'
 		)->next ();
-		
+
 		//copy the remaining replies across
 		foreach ($xml->channel->item as $item) $items->set (array (
 			'./title'		=> $item->title,
@@ -476,17 +489,17 @@ if (CAN_REPLY && AUTH && TEXT) {
 			//has the reply been deleted? (blanked)
 			'./category'		=> !$item->xpath ('./category')
 		))->next ();
-		
+
 		//write the file: first move the write-head to 0, remove the file's contents, and then write new one
 		rewind ($f); ftruncate ($f, 0); fwrite ($f, $rss);
 	}
-	
+
 	//close the lock / file
 	flock ($f, LOCK_UN); fclose ($f);
-	
+
 	//regenerate the forum / sub-forums's RSS file
 	indexRSS ();
-	
+
 	//refresh page to see the new post added
 	header ("Location: $url", true, 303);
 	exit;
@@ -557,7 +570,7 @@ $template->set (array (
 	//if the user who made the post is a mod, also mark the whole post as by a mod
 	//(you might want to style any posts made by a mod differently)
 	'.nnf_post@class, #nnf_post-author@class' => !isMod ($post->author) ? 'nnf_mod' : false,
-	
+
 	//append / delete links?
     '#nnf_post-append, #nnf_post-delete' => !CAN_REPLY,
     //plus / minus link not available when not logged in with http_auth
@@ -583,15 +596,15 @@ if (!count ($thread)) {
 	//<stackoverflow.com/questions/2119686/sorting-an-array-of-simplexml-objects/2120569#2120569>
 	foreach ($thread as &$node) $sort[] = strtotime ($node->pubDate);
 	array_multisort ($sort, SORT_ASC, $thread);
-	
+
 	//do the page links
 	theme_pageList ($template, $FILE, $PAGE, $PAGES);
 	//slice the full list into the current page
 	$thread = array_slice ($thread, ($PAGE-1) * FORUM_POSTS, FORUM_POSTS);
-	
+
 	//get the dummy list-item to repeat (removes it and takes a copy)
 	$item = $template->repeat ('.nnf_reply');
-	
+
 	//index number of the replies, accounting for which page we are on
 	$no = ($PAGE-1) * FORUM_POSTS;
 	//apply the data to the template (a reply)
@@ -644,7 +657,7 @@ if (!count ($thread)) {
             //minus link not available when not logged in with http_auth
             '.nnf_reply-minus'  => !CAN_VOTE
 		));
-		
+
 		try {	//insert the post-text, dealing with an invalid HTML error
 			$item->setValue ('.nnf_reply-text', $reply->description, true);
 			$item->remove (array ('./@class' => 'nnf_error'));
@@ -654,7 +667,7 @@ if (!count ($thread)) {
 			//remove the append button
 			$item->remove ('.nnf_reply-append');
 		}
-		
+
 		$item->next ();
 	}
 }
@@ -667,19 +680,19 @@ if (CAN_REPLY) $template->set (array (
 	'input#nnf_name-field@value'		=> NAME, 'input#nnf_name-field@maxlength'	=> SIZE_NAME,
 	'input#nnf_pass-field@value'		=> PASS, 'input#nnf_pass-field@maxlength'	=> SIZE_PASS,
 	'textarea#nnf_text-field'		=> TEXT, 'textarea#nnf_text-field@maxlength'	=> SIZE_TEXT
-	
+
 //is the user already signed-in?
 ))->remove (AUTH_HTTP
 	//don’t need the usual name / password fields and the deafult message for anonymous users
 	? '#nnf_name, #nnf_pass, #nnf_email, #nnf_error-none'
 	//user is not signed in, remove the "you are signed in as:" field and the message for signed in users
 	: '#nnf_name-http, #nnf_error-none-http'
-	
+
 //are new registrations allowed?
 )->remove (FORUM_NEWBIES
 	? '#nnf_error-newbies'	//yes: remove the warning message
 	: '#nnf_error-none'	//no:  remove the default message
-	
+
 //handle error messages
 )->remove (array (
 	//if there's an error of any sort, remove the default messages
