@@ -384,7 +384,7 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
     if (AUTH_HTTP && CAN_VOTE &&
         !(strtolower (NAME) == strtolower ($post->author)) && //cant vote on own post
         !(in_array(strtolower (NAME), explode(',', $post->voted))) && //hasnt already voted
-        (($user_karma / 1) > 2) //user has enough karma to vote
+        ($user_karma >= 2) //user has enough karma to vote
     ) {
         //get a write lock on the file so that between now and saving, no other posts could slip in
         $f = fopen ("$FILE.rss", 'r+'); flock ($f, LOCK_EX);
