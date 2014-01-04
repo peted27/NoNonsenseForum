@@ -5,7 +5,7 @@
    you may do whatever you want to this code as long as you give credit to Kroc Camen, <camendesign.com>
 *//*
    what gets defined here:
-	
+
 	const / var	attribs	description
 	--------------------------------------------------------------------------------------------------------------------
 	key:		b	boolean (true / false)
@@ -19,9 +19,9 @@
 	FORUM_PATH	// U	relative URL from the web-root, to NNF
 				if NNF is at root, this would be "/", otherwise the "/sub-folder/" NNF is within
 	HTACCESS	b	if the ".htaccess" file is present and enabled or not
-	
+
 	-- everything in 'config.php' (if present) and 'config.default.php' --
-	
+
 	FORUM_URL		fully-qualified domain URL, e.g. "http://forum.camendesign.com"
 	PAGE			page-number given in the querystring -- not necessarily a valid page number!
 	PATH		/	current sub-forum the viewer is in
@@ -30,13 +30,13 @@
 	PATH_DIR	// ?	relative server path from NNF's root (`FORUM_ROOT`) to the current sub-forum
 	SUBFORUM		the name of the current sub-forum (regardless of nesting), not URL-encoded
 	FORM_SUBMIT	b	if an input form has been submitted (new-thread / reply / delete / append)
-	
+
 	NAME			username given
 	PASS			password given
 	AUTH		b	if the username / password are correct
 	AUTH_HTTP	b	if the authentication was via HTTP_AUTH *and* was correct
 				(will be false if the username / password were wrong, even if HTTP_AUTH was used)
-	
+
 	FORUM_LOCK		the contents of 'locked.txt' which sets restrictions on the forum / sub-forums
 				see section 5 in the README file
 	$MODS			array of the names of moderators for the whole forum, and the current sub-forum
@@ -44,17 +44,17 @@
 	IS_ADMIN	b	if the current viewer is the site admin (first name in 'mods.txt')
 	IS_MOD		b	if the current viewer is a moderator for the current forum
 	IS_MEMBER	b	if the current viewer is a member of the current forum
-	
+
 	THEME_ROOT	/  ?	full server path to the currently selected theme
-	
+
 	-- everything in 'theme.php' (some dynamic strings for the default language) --
-	
+
 	-- everything in 'theme.config.php' (if present) and 'theme.config.default.php' --
-	
+
 	-- depending on `THEME_LANGS`, the contents of the 'lang.*.php' files --
-	
+
 	LANG			currently user-selected language, '' for default
-	
+
 	DATE_FORMAT		the human-readable date format of the currently user-selected language
 	THEME_TITLE		the `sprintf`-formatted `<title>` string of index / thread pages in the selected language
 	THEME_TITLE_PAGENO	the `sprintf`-formatted optional page-number portion of the title, in the selected lang.
@@ -66,7 +66,7 @@
 	THEME_DEL_USER		the HTML message used when a user deletes their own post, in the forum's default language
 	THEME_DEL_MOD		the HTML message used when a mod deletes a post, in the forum's default langugae
 	THEME_HTML_ERROR	the HTML message used when a post is corrupt (malformed HTML), in the forum's default lang.
-*/	
+*/
 
 
 /* server configutation
@@ -194,17 +194,18 @@ if ((	//if HTTP authentication is used, we don’t need to validate the form fie
 	//- if registrations are allowed (`FORUM_NEWBIES` is true)
 	//- you can’t create new users with the HTTP_AUTH sign in
 	if (FORUM_NEWBIES && !isset ($_SERVER['PHP_AUTH_USER']) && !file_exists ($user))
+    {
 		file_put_contents ($user, hash ('sha512', $name.PASS)) or require FORUM_LIB.'error_permissions.php';
-        file_put_contents ($karma, KARMA_DEFAULT) or require FORUM_LIB.'error_permissions.php'; 
-    ;
-	
+        file_put_contents ($karma, KARMA_DEFAULT) or require FORUM_LIB.'error_permissions.php';
+    }
+
 	//does password match?
 	define ('AUTH', @file_get_contents ($user) == hash ('sha512', $name.PASS));
-	
+
 	//if signed in with HTTP_AUTH, confirm that it’s okay to use
 	//(e.g. the user could still have given the wrong password with HTTP_AUTH)
 	define ('AUTH_HTTP', @$_SERVER['PHP_AUTH_USER'] ? AUTH : false);
-	
+
 	//if the user clicked the sign-in button to authenticate, do a 303 redirect to the same URL to 'eat' the
 	//form-submission so that if they click the back-button, they don't get prompted to "resubmit the form data"
 	if (@$_POST['signin'] && AUTH_HTTP) header (
@@ -290,7 +291,7 @@ define ('LANG',
 );
 
 //for curtness, and straight-forward compatibility with older versions of NNF, we shorthand these translations;
-//the defaults (`LANG`='') are defined in 'theme.php' and overrided if the user selects a language ('lang.*.php') 
+//the defaults (`LANG`='') are defined in 'theme.php' and overrided if the user selects a language ('lang.*.php')
 //(the purpose of each of these constants are described in the list at the top of this page)
 @define ('DATE_FORMAT',		$LANG[LANG]['date_format']);
 @define ('THEME_TITLE',		$LANG[LANG]['title']);

@@ -376,9 +376,6 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
 
     $user_karma = (float) file_get_contents(FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$name.karma");
 
-    //find the post using the ID (we need to know the numerical index for later)
-    for ($i=0; $i<count ($xml->channel->item); $i++) if (strstr ($xml->channel->item[$i]->link, '#') == "#$ID") break;
-    $post = $xml->channel->item[$i];
 
     //work out if user can vote on this post
     if (AUTH_HTTP && CAN_VOTE &&
@@ -390,6 +387,10 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
         $f = fopen ("$FILE.rss", 'r+'); flock ($f, LOCK_EX);
         $xml = simplexml_load_string (fread ($f, filesize ("$FILE.rss"))) or require FORUM_LIB.'error_xml.php';
 
+        //find the post using the ID (we need to know the numerical index for later)
+        for ($i=0; $i<count ($xml->channel->item); $i++) if (strstr ($xml->channel->item[$i]->link, '#') == "#$ID") break;
+        $post = $xml->channel->item[$i];
+
         //apply the new score
         $score = @$_GET['plus'] ? SCORE_PLUS : (@$_GET['minus'] ? SCORE_MINUS : 0);
         $post->score += $score;
@@ -400,7 +401,7 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
         flock ($f, LOCK_UN); fclose ($f);
 
         //open and lock authors karma file
-        $author_karma_file = FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR. hash ('sha512', strtolower ($post->author)) .".karma"
+        $author_karma_file = FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR. hash ('sha512', strtolower ($post->author)) .".karma";
         $f = fopen ($author_karma_file, 'r+'); flock ($f, LOCK_EX);
         //read authors karma
         $author_karma = (float) file_get_contents($author_karma_file);
