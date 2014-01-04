@@ -400,9 +400,10 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
         flock ($f, LOCK_UN); fclose ($f);
 
         //open and lock authors karma file
-        $f = fopen (FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$post->author.karma", 'r+'); flock ($f, LOCK_EX);
+        $author_karma_file = FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR. hash ('sha512', strtolower ($post->author)) .".karma"
+        $f = fopen ($author_karma_file, 'r+'); flock ($f, LOCK_EX);
         //read authors karma
-        $author_karma = (float) file_get_contents(FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$post->author.karma");
+        $author_karma = (float) file_get_contents($author_karma_file);
         //calculate new karma
         $author_karma += @$_GET['plus'] ? KARM_PLUS : (@$_GET['minus'] ? KARMA_MINUS : 0);
         //commit the data
