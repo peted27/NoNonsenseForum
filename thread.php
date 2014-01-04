@@ -402,7 +402,7 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
         //open and lock authors karma file
         $f = fopen (FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$post->author.karma", 'r+'); flock ($f, LOCK_EX);
         //read authors karma
-        $author_karma = file_get_contents(FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$post->author.karma");
+        $author_karma = (float) file_get_contents(FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$post->author.karma");
         //calculate new karma
         $author_karma += @$_GET['plus'] ? KARM_PLUS : (@$_GET['minus'] ? KARMA_MINUS : 0);
         //commit the data
