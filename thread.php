@@ -374,7 +374,7 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
     //get id of post, must be a better way
     $ID = (preg_match ('/^[A-Z0-9]+$/i', @$_GET['plus']) ? $_GET['plus'] : (@$_GET['minus'] ? $_GET['minus'] : false));
 
-    $user_karma = file_get_contents(FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$name.karma");
+    $user_karma = (float) file_get_contents(FORUM_ROOT.DIRECTORY_SEPARATOR.FORUM_USERS.DIRECTORY_SEPARATOR."$name.karma");
 
     //find the post using the ID (we need to know the numerical index for later)
     for ($i=0; $i<count ($xml->channel->item); $i++) if (strstr ($xml->channel->item[$i]->link, '#') == "#$ID") break;
@@ -384,7 +384,7 @@ if (isset($_GET['plus']) || isset($_GET['minus'])) {
     if (AUTH_HTTP && CAN_VOTE &&
         !(strtolower (NAME) == strtolower ($post->author)) && //cant vote on own post
         !(in_array(strtolower (NAME), explode(',', $post->voted))) && //hasnt already voted
-        ($user_karma >= 2) //user has enough karma to vote
+        ($user_karma >= 2.0) //user has enough karma to vote
     ) {
         //get a write lock on the file so that between now and saving, no other posts could slip in
         $f = fopen ("$FILE.rss", 'r+'); flock ($f, LOCK_EX);
